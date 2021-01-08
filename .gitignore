@@ -1,0 +1,18 @@
+# project-specific
+
+# PyCharm
+.idea
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Vim
+*.swp
