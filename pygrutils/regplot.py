@@ -68,7 +68,8 @@ def regplot(
 
     scatter_kws = {} if scatter_kws is None else scatter_kws
     scatter_kws.setdefault("alpha", 0.8)
-    scatter_kws.setdefault("c", h[0].get_color())
+    if "c" not in scatter_kws and "color" not in scatter_kws:
+        scatter_kws.setdefault("c", h[0].get_color())
     ax.scatter(x, y, **scatter_kws)
 
     return fit_results
