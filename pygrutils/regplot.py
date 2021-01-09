@@ -57,17 +57,19 @@ def regplot(
     line_kws = {} if line_kws is None else line_kws
 
     ci_kws.setdefault("alpha", 0.15)
+    if "ec" not in ci_kws and "edgecolor" not in ci_kws:
+        ci_kws["ec"] = "none"
 
     # if color is provided in line_kws, use same one in ci_kws (unless overridden)
     color_key = None
-    if "c" not in ci_kws and "color" not in ci_kws:
+    if not any(_ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]):
         if "c" in line_kws:
             color_key = "c"
         elif "color" in line_kws:
             color_key = "color"
             
         if color_key is not None:
-            ci_kws[color_key] = line_kws[color_key]
+            ci_kws["facecolor"] = line_kws[color_key]
             
     # draw the fit line and error interval
     ax.fill_between(
