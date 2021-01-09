@@ -52,20 +52,35 @@ def regplot(
     eval_x = sm.add_constant(np.linspace(np.min(x), np.max(x), n_points))
     pred = fit_results.get_prediction(eval_x)
 
-    # draw the fit line and error interval
+    # set up keywords for fit line and error interval
     ci_kws = {} if ci_kws is None else ci_kws
+    line_kws = {} if line_kws is None else line_kws
+
     ci_kws.setdefault("alpha", 0.15)
+
+    # if color is provided in line_kws, use same one in ci_kws (unless overridden)
+    color_key = None
+    if "c" not in ci_kws and "color" not in ci_kws:
+        if "c" in line_kws:
+            color_key = "c"
+        elif "color" in line_kws:
+            color_key = "color"
+            
+        if color_key is not None:
+            ci_kws[color_key] = line_kws[color_key]
+            
+    # draw the fit line and error interval
     ax.fill_between(
         eval_x[:, 1],
         pred.predicted_mean - 2 * pred.se_mean,
         pred.predicted_mean + 2 * pred.se_mean,
         **ci_kws,
     )
-    line_kws = {} if line_kws is None else line_kws
     if "lw" not in line_kws and "linewidth" not in line_kws:
         line_kws["lw"] = 2.0
     h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
 
+    # make the scatter plot
     scatter_kws = {} if scatter_kws is None else scatter_kws
     scatter_kws.setdefault("alpha", 0.8)
     if "c" not in scatter_kws and "color" not in scatter_kws:
