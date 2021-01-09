@@ -50,6 +50,28 @@ res = gr.regplot(x=x, y=y, ax=ax2)
 sns.despine(offset=10, ax=ax1)
 sns.despine(offset=10, ax=ax2)
 
+# %% [markdown]
+# ## Custom plotting options
+
 # %%
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+kwargs = {"scatter_kws": {"color": "r"}, "line_kws": {"color": "k"}}
+
+sns.regplot(x=x, y=y, **kwargs, ax=ax1)
+res = gr.regplot(x=x, y=y, **kwargs, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %% [markdown]
+# ## `pygrutils`-specific plotting options
+
+# %%
+fig, ax = plt.subplots()
+
+res = gr.regplot(x=x, y=y, ci_kws={"fc": "r"}, n_points=2, ax=ax)
+
+sns.despine(offset=10, ax=ax)
 
 # %%
