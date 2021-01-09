@@ -20,6 +20,7 @@ def regplot(
     fit_reg: bool = True,
     ci: Optional[float] = 95,
     n_points: int = 100,
+    truncate: bool = True,
     dropna: bool = True,
     label: Optional[str] = None,
     color: Optional = None,
@@ -52,6 +53,9 @@ def regplot(
         to avoid drawing the confidence interval.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
+    truncate
+        If true, the regression line is bounded by the data limits. Otherwise it extends
+        to the x-axis limits.
     dropna
         Drop any observations in which either `x` or `y` is not-a-number.
     label
@@ -91,16 +95,39 @@ def regplot(
     x_fit = sm.add_constant(x)
     fit_results = sm.OLS(y, x_fit).fit()
 
-    h = None
+    # figure out what color to use (unless we already know, or we don't draw anything)
+    if color is None and (scatter or fit_reg):
+        h, = ax.plot([], [])
+        color = h.get_color()
+        h.remove()
+
+    # make the scatter plot
+    if scatter:
+        scatter_kws = {} if scatter_kws is None else scatter_kws
+        scatter_kws.setdefault("alpha", 0.8)
+        if "c" not in scatter_kws and "color" not in scatter_kws:
+            scatter_kws.setdefault("c", color)
+        if marker is not None:
+            scatter_kws.setdefault("marker", marker)
+        if label is not None:
+            scatter_kws.setdefault("label", label)
+        ax.scatter(x, y, **scatter_kws)
+
+    # draw the fit line and confidence interval
     if fit_reg and len(x) > 2:
-        eval_x = sm.add_constant(np.linspace(np.min(x), np.max(x), n_points))
+        if truncate:
+            low_x = np.min(x)
+            high_x = np.max(x)
+        else:
+            low_x, high_x = ax.get_xlim()
+        eval_x = sm.add_constant(np.linspace(low_x, high_x, n_points))
         pred = fit_results.get_prediction(eval_x)
 
         # set up keywords for fit line and error interval
         ci_kws = {} if ci_kws is None else ci_kws
         line_kws = {} if line_kws is None else line_kws
 
-        if color is not None and "c" not in line_kws and "color" not in line_kws:
+        if "c" not in line_kws and "color" not in line_kws:
             line_kws["color"] = color
 
         ci_kws.setdefault("alpha", 0.15)
@@ -132,19 +159,7 @@ def regplot(
             line_kws["lw"] = 2.0
         if label is not None and not scatter:
             line_kws.setdefault("label", label)
-        h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
-
-    # make the scatter plot
-    if scatter:
-        scatter_kws = {} if scatter_kws is None else scatter_kws
-        scatter_kws.setdefault("alpha", 0.8)
-        if h is not None and "c" not in scatter_kws and "color" not in scatter_kws:
-            scatter_kws.setdefault("c", h[0].get_color())
-        if marker is not None:
-            scatter_kws.setdefault("marker", marker)
-        if label is not None:
-            scatter_kws.setdefault("label", label)
-        ax.scatter(x, y, **scatter_kws)
+        ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
 
     return fit_results
     
