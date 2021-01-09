@@ -15,6 +15,8 @@ def regplot(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,
     data: Optional[pd.DataFrame] = None,
+    scatter: bool = True,
+    fit_reg: bool = True,
     n_points: int = 100,
     dropna: bool = True,
     scatter_kws: Optional[dict] = None,
@@ -35,6 +37,10 @@ def regplot(
     data
         Data in Pandas format. `x` and `y` should be strings indicating which columns to
         use for independent and dependent variable, respectively.
+    scatter
+        If true, draw the scatter plot.
+    fit_reg
+        If true, calculate and draw a linear regression.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
     dropna
@@ -68,7 +74,8 @@ def regplot(
     x_fit = sm.add_constant(x)
     fit_results = sm.OLS(y, x_fit).fit()
 
-    if len(x) > 2:
+    h = None
+    if fit_reg and len(x) > 2:
         eval_x = sm.add_constant(np.linspace(np.min(x), np.max(x), n_points))
         pred = fit_results.get_prediction(eval_x)
 
@@ -101,15 +108,14 @@ def regplot(
         if "lw" not in line_kws and "linewidth" not in line_kws:
             line_kws["lw"] = 2.0
         h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
-    else:
-        h = None
 
     # make the scatter plot
-    scatter_kws = {} if scatter_kws is None else scatter_kws
-    scatter_kws.setdefault("alpha", 0.8)
-    if h is not None and "c" not in scatter_kws and "color" not in scatter_kws:
-        scatter_kws.setdefault("c", h[0].get_color())
-    ax.scatter(x, y, **scatter_kws)
+    if scatter:
+        scatter_kws = {} if scatter_kws is None else scatter_kws
+        scatter_kws.setdefault("alpha", 0.8)
+        if h is not None and "c" not in scatter_kws and "color" not in scatter_kws:
+            scatter_kws.setdefault("c", h[0].get_color())
+        ax.scatter(x, y, **scatter_kws)
 
     return fit_results
     
