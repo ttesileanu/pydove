@@ -12,9 +12,11 @@ from typing import Union, Optional, Sequence, Tuple
 
 
 def regplot(
-    x: Sequence = None,
-    y: Sequence = None,
+    x: Union[None, str, pd.Series, Sequence] = None,
+    y: Union[None, str, pd.Series, Sequence] = None,
+    data: Optional[pd.DataFrame] = None,
     n_points: int = 100,
+    dropna: bool = True,
     scatter_kws: Optional[dict] = None,
     line_kws: Optional[dict] = None,
     ci_kws: Optional[dict] = None,
@@ -25,11 +27,18 @@ def regplot(
     Parameters
     ----------
     x
-        Data for x-axis (independent variable).
+        Data for x-axis (independent variable). This can be the data itself, or a string
+        indicating a column in `data`.
     y
-        Data for y-axis (dependent variable).
+        Data for y-axis (dependent variable). This can be the data itself, or a string
+        indicating a column in `data`.
+    data
+        Data in Pandas format. `x` and `y` should be strings indicating which columns to
+        use for independent and dependent variable, respectively.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
+    dropna
+        Drop any observations in which either `x` or `y` is not-a-number.
     scatter_kws
         Additional keyword arguments to pass to `plt.scatter` for the scatter plot.
     line_kws
@@ -42,6 +51,9 @@ def regplot(
 
     Returns the results from `sm.OLS.fit()`.
     """
+    # convert data to a standard form
+    x, y = _standardize_data(x=x, y=y, data=data, dropna=dropna)
+
     # perform some basic checks
     if len(x) != len(y):
         raise ValueError("Different length x and y..")
@@ -100,3 +112,30 @@ def regplot(
     ax.scatter(x, y, **scatter_kws)
 
     return fit_results
+    
+
+def _standardize_data(
+    x: Union[None, str, pd.Series, Sequence] = None,
+    y: Union[None, str, pd.Series, Sequence] = None,
+    data: Optional[pd.DataFrame] = None,
+    dropna: bool = True,
+) -> Tuple[Sequence, Sequence]:
+    # trying to avoid copying as much as possible
+    if data is not None:
+        if dropna:
+            # drop NaNs
+            data = data.dropna()
+
+        x = data[x].values
+        y = data[y].values
+    else:
+        if dropna:
+            # drop NaNs
+            x = np.asarray(x)
+            y = np.asarray(y)
+
+            mask = np.isnan(x) | np.isnan(y)
+            x = x[~mask]
+            y = y[~mask]
+
+    return x, y
