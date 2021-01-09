@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.special import erfinv
 from typing import Union, Optional, Sequence, Tuple
 
 
@@ -17,6 +18,7 @@ def regplot(
     data: Optional[pd.DataFrame] = None,
     scatter: bool = True,
     fit_reg: bool = True,
+    ci: Optional[float] = 95,
     n_points: int = 100,
     dropna: bool = True,
     label: Optional[str] = None,
@@ -44,6 +46,10 @@ def regplot(
         If true, draw the scatter plot.
     fit_reg
         If true, calculate and draw a linear regression.
+    ci
+        Size of confidence interval to draw for the regression line (in percent). This
+        will be drawn using translucent bands around the regression line. Set to `None`
+        to avoid drawing the confidence interval.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
     dropna
@@ -113,12 +119,15 @@ def regplot(
                 ci_kws["facecolor"] = line_kws[color_key]
                 
         # draw the fit line and error interval
-        ax.fill_between(
-            eval_x[:, 1],
-            pred.predicted_mean - 2 * pred.se_mean,
-            pred.predicted_mean + 2 * pred.se_mean,
-            **ci_kws,
-        )
+        mu = pred.predicted_mean
+        std = np.sqrt(pred.var_pred_mean)
+
+        # find out what multiple of the standard deviation to use (if any)
+        if ci is not None:
+            n_std = np.sqrt(2) * erfinv(ci / 100)
+            err = n_std * std
+            ax.fill_between(eval_x[:, 1], mu - err, mu + err, **ci_kws)
+
         if "lw" not in line_kws and "linewidth" not in line_kws:
             line_kws["lw"] = 2.0
         if label is not None and not scatter:
