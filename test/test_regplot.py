@@ -74,4 +74,28 @@ res = gr.regplot(x=x, y=y, ci_kws={"fc": "r"}, n_points=2, ax=ax)
 
 sns.despine(offset=10, ax=ax)
 
+# %% [markdown]
+# ## Robustness to few data points
+
+# %% [markdown]
+# `pygrutils.regplot` uses `statsmodels` for confidence-interval calculations. `seaborn` uses custom code. The two are similar but not exactly the same, especially when working with very few data points.
+
+# %%
+n_max = 5
+fig, axs = plt.subplots(
+    n_max, 2, figsize=(12, 4 * n_max), sharey=True, tight_layout=True
+)
+
+for i, crt_axs in enumerate(axs):
+    crt_x = x[:i]
+    crt_y = y[:i]
+
+    sns.regplot(x=crt_x, y=crt_y, ax=crt_axs[0])
+    gr.regplot(crt_x, crt_y, ax=crt_axs[1])
+
+    for k, ax in enumerate(crt_axs):
+        crt_name = ["seaborn", "pygrutils"][k]
+        ax.set_title(f"{i} points, {crt_name}")
+        sns.despine(offset=10, ax=ax)
+
 # %%

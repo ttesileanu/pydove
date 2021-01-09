@@ -42,6 +42,13 @@ def regplot(
 
     Returns the results from `sm.OLS.fit()`.
     """
+    # perform some basic checks
+    if len(x) != len(y):
+        raise ValueError("Different length x and y..")
+    if len(x) == 0:
+        # nothing to do
+        return
+    
     # handle some defaults
     ax = plt.gca() if ax is None else ax
 
@@ -49,43 +56,46 @@ def regplot(
     x_fit = sm.add_constant(x)
     fit_results = sm.OLS(y, x_fit).fit()
 
-    eval_x = sm.add_constant(np.linspace(np.min(x), np.max(x), n_points))
-    pred = fit_results.get_prediction(eval_x)
+    if len(x) > 2:
+        eval_x = sm.add_constant(np.linspace(np.min(x), np.max(x), n_points))
+        pred = fit_results.get_prediction(eval_x)
 
-    # set up keywords for fit line and error interval
-    ci_kws = {} if ci_kws is None else ci_kws
-    line_kws = {} if line_kws is None else line_kws
+        # set up keywords for fit line and error interval
+        ci_kws = {} if ci_kws is None else ci_kws
+        line_kws = {} if line_kws is None else line_kws
 
-    ci_kws.setdefault("alpha", 0.15)
-    if "ec" not in ci_kws and "edgecolor" not in ci_kws:
-        ci_kws["ec"] = "none"
+        ci_kws.setdefault("alpha", 0.15)
+        if "ec" not in ci_kws and "edgecolor" not in ci_kws:
+            ci_kws["ec"] = "none"
 
-    # if color is provided in line_kws, use same one in ci_kws (unless overridden)
-    color_key = None
-    if not any(_ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]):
-        if "c" in line_kws:
-            color_key = "c"
-        elif "color" in line_kws:
-            color_key = "color"
-            
-        if color_key is not None:
-            ci_kws["facecolor"] = line_kws[color_key]
-            
-    # draw the fit line and error interval
-    ax.fill_between(
-        eval_x[:, 1],
-        pred.predicted_mean - 2 * pred.se_mean,
-        pred.predicted_mean + 2 * pred.se_mean,
-        **ci_kws,
-    )
-    if "lw" not in line_kws and "linewidth" not in line_kws:
-        line_kws["lw"] = 2.0
-    h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
+        # if color is provided in line_kws, use same one in ci_kws (unless overridden)
+        color_key = None
+        if not any(_ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]):
+            if "c" in line_kws:
+                color_key = "c"
+            elif "color" in line_kws:
+                color_key = "color"
+                
+            if color_key is not None:
+                ci_kws["facecolor"] = line_kws[color_key]
+                
+        # draw the fit line and error interval
+        ax.fill_between(
+            eval_x[:, 1],
+            pred.predicted_mean - 2 * pred.se_mean,
+            pred.predicted_mean + 2 * pred.se_mean,
+            **ci_kws,
+        )
+        if "lw" not in line_kws and "linewidth" not in line_kws:
+            line_kws["lw"] = 2.0
+        h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
+    else:
+        h = None
 
     # make the scatter plot
     scatter_kws = {} if scatter_kws is None else scatter_kws
     scatter_kws.setdefault("alpha", 0.8)
-    if "c" not in scatter_kws and "color" not in scatter_kws:
+    if h is not None and "c" not in scatter_kws and "color" not in scatter_kws:
         scatter_kws.setdefault("c", h[0].get_color())
     ax.scatter(x, y, **scatter_kws)
 
