@@ -19,6 +19,9 @@ def regplot(
     fit_reg: bool = True,
     n_points: int = 100,
     dropna: bool = True,
+    label: Optional[str] = None,
+    color: Optional = None,
+    marker: Optional = "o",
     scatter_kws: Optional[dict] = None,
     line_kws: Optional[dict] = None,
     ci_kws: Optional[dict] = None,
@@ -45,6 +48,14 @@ def regplot(
         Number of points to use for drawing the fit line and confidence interval.
     dropna
         Drop any observations in which either `x` or `y` is not-a-number.
+    label
+        Label to apply to either the scatter plot or regression line (if `scatter` is
+        false) for use in a legend.
+    color
+        Color to apply to all plot elements; will be superseded by colors passed in
+        `scatter_kws` or `line_kws`.
+    marker
+        Marker to use for the scatter-plot glyphs.
     scatter_kws
         Additional keyword arguments to pass to `plt.scatter` for the scatter plot.
     line_kws
@@ -83,6 +94,9 @@ def regplot(
         ci_kws = {} if ci_kws is None else ci_kws
         line_kws = {} if line_kws is None else line_kws
 
+        if color is not None and "c" not in line_kws and "color" not in line_kws:
+            line_kws["color"] = color
+
         ci_kws.setdefault("alpha", 0.15)
         if "ec" not in ci_kws and "edgecolor" not in ci_kws:
             ci_kws["ec"] = "none"
@@ -107,6 +121,8 @@ def regplot(
         )
         if "lw" not in line_kws and "linewidth" not in line_kws:
             line_kws["lw"] = 2.0
+        if label is not None and not scatter:
+            line_kws.setdefault("label", label)
         h = ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
 
     # make the scatter plot
@@ -115,6 +131,10 @@ def regplot(
         scatter_kws.setdefault("alpha", 0.8)
         if h is not None and "c" not in scatter_kws and "color" not in scatter_kws:
             scatter_kws.setdefault("c", h[0].get_color())
+        if marker is not None:
+            scatter_kws.setdefault("marker", marker)
+        if label is not None:
+            scatter_kws.setdefault("label", label)
         ax.scatter(x, y, **scatter_kws)
 
     return fit_results
