@@ -20,6 +20,7 @@ def regplot(
     fit_reg: bool = True,
     ci: Optional[float] = 95,
     n_points: int = 100,
+    order: int = 1,
     truncate: bool = True,
     dropna: bool = True,
     label: Optional[str] = None,
@@ -53,6 +54,8 @@ def regplot(
         to avoid drawing the confidence interval.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
+    order
+        If `order` is greater than 1, perform a polynomial regression.
     truncate
         If true, the regression line is bounded by the data limits. Otherwise it extends
         to the x-axis limits.
@@ -91,8 +94,13 @@ def regplot(
     # handle some defaults
     ax = plt.gca() if ax is None else ax
 
-    # calculate best-fit line and interval
-    x_fit = sm.add_constant(x)
+    # calculate best-fit line (or polynomial) and interval
+    if order != 1:
+        x_fit = np.empty((len(x), order + 1))
+        for k in range(order + 1):
+            x_fit[:, k] = x ** k
+    else:
+        x_fit = sm.add_constant(x)
     fit_results = sm.OLS(y, x_fit).fit()
 
     # figure out what color to use (unless we already know, or we don't draw anything)
@@ -120,8 +128,15 @@ def regplot(
             high_x = np.max(x)
         else:
             low_x, high_x = ax.get_xlim()
-        eval_x = sm.add_constant(np.linspace(low_x, high_x, n_points))
-        pred = fit_results.get_prediction(eval_x)
+
+        eval_x = np.linspace(low_x, high_x, n_points)
+        if order != 1:
+            eval_x_fit = np.empty((len(x), order + 1))
+            for k in range(order + 1):
+                eval_x_fit[:, k] = eval_x ** k
+        else:
+            eval_x_fit = sm.add_constant(eval_x)
+        pred = fit_results.get_prediction(eval_x_fit)
 
         # set up keywords for fit line and error interval
         ci_kws = {} if ci_kws is None else ci_kws
@@ -153,13 +168,13 @@ def regplot(
         if ci is not None:
             n_std = np.sqrt(2) * erfinv(ci / 100)
             err = n_std * std
-            ax.fill_between(eval_x[:, 1], mu - err, mu + err, **ci_kws)
+            ax.fill_between(eval_x, mu - err, mu + err, **ci_kws)
 
         if "lw" not in line_kws and "linewidth" not in line_kws:
             line_kws["lw"] = 2.0
         if label is not None and not scatter:
             line_kws.setdefault("label", label)
-        ax.plot(eval_x[:, 1], pred.predicted_mean, **line_kws)
+        ax.plot(eval_x, pred.predicted_mean, **line_kws)
 
     return fit_results
     
