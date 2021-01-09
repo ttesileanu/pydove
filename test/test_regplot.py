@@ -21,6 +21,7 @@
 # %autoreload 2
 
 import numpy as np
+import pandas as pd
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -97,5 +98,114 @@ for i, crt_axs in enumerate(axs):
         crt_name = ["seaborn", "pygrutils"][k]
         ax.set_title(f"{i} points, {crt_name}")
         sns.despine(offset=10, ax=ax)
+
+# %% [markdown]
+# ## Usage with a `DataFrame`
+
+# %%
+df = pd.DataFrame({"x1": x, "x2": y})
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+sns.regplot(x="x1", y="x2", data=df, ax=ax1)
+res = gr.regplot("x1", "x2", df, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %% [markdown]
+# ## Check turning on or off the display of the scatter plot or fit line, and label
+
+# %%
+fig, axs = plt.subplots(4, 2, figsize=(12, 16), tight_layout=True)
+
+for i_scatter in range(2):
+    crt_scatter = i_scatter != 0
+    for i_fit in range(2):
+        crt_fit = i_fit != 0
+
+        i = i_scatter * 2 + i_fit
+
+        sns.regplot(
+            x=x, y=y, scatter=crt_scatter, fit_reg=crt_fit, label="fit", ax=axs[i, 0]
+        )
+        gr.regplot(
+            x=x, y=y, scatter=crt_scatter, fit_reg=crt_fit, label="fit", ax=axs[i, 1]
+        )
+        
+        if i > 0:
+            axs[i, 0].legend(frameon=False)
+            axs[i, 1].legend(frameon=False)
+
+        axs[i, 0].set_title(f"seaborn, scatter={crt_scatter}, fit_reg={crt_fit}")
+        axs[i, 1].set_title(f"pygrutils, scatter={crt_scatter}, fit_reg={crt_fit}")
+
+for crt_axs in axs:
+    for ax in crt_axs:
+        sns.despine(offset=10, ax=ax)
+
+# %% [markdown]
+# ## Check direct color and marker options
+
+# %%
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+kwargs = {"color": "r", "marker": "+"}
+
+sns.regplot(x=x, y=y, **kwargs, ax=ax1)
+res = gr.regplot(x=x, y=y, **kwargs, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %% [markdown]
+# ## Check CI size
+
+# %%
+ci_vals = [None, 40, 90, 99]
+n_ci = len(ci_vals)
+
+fig, axs = plt.subplots(n_ci, 2, figsize=(12, n_ci * 4), tight_layout=True)
+
+for i, ci in enumerate(ci_vals):
+    crt_axs = axs[i]
+
+    sns.regplot(x=x, y=y, ci=ci, ax=crt_axs[0])
+    res = gr.regplot(x=x, y=y, ci=ci, ax=crt_axs[1])
+
+    sns.despine(offset=10, ax=crt_axs[0])
+    sns.despine(offset=10, ax=crt_axs[1])
+
+    crt_axs[0].set_title(f"seaborn, CI={ci}")
+    crt_axs[1].set_title(f"pygrutils, CI={ci}")
+
+# %% [markdown]
+# ## Check truncate
+
+# %%
+fig, axs = plt.subplots(2, 2, figsize=(12, 8), tight_layout=True)
+
+for i, crt_axs in enumerate(axs):
+    sns.regplot(x=x, y=y, truncate=i == 0, ax=crt_axs[0])
+    res = gr.regplot(x=x, y=y, truncate=i == 0, ax=crt_axs[1])
+
+    sns.despine(offset=10, ax=crt_axs[0])
+    sns.despine(offset=10, ax=crt_axs[1])
+
+    crt_axs[0].set_title(f"seaborn, truncate={i == 0}")
+    crt_axs[1].set_title(f"pygrutils, truncate={i == 0}")
+
+# %% [markdown]
+# ## Check higher order fits
+
+# %%
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+order = 3
+sns.regplot(x=x, y=y, order=order, ax=ax1)
+res = gr.regplot(x=x, y=y, order=order, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
 
 # %%
