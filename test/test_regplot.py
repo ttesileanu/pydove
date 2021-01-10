@@ -28,7 +28,7 @@ import seaborn as sns
 
 import statsmodels.api as sm
 
-import pygrutils.regplot as gr
+import pygrutils as gr
 
 # %% [markdown]
 # ## Basic usage
