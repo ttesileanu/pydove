@@ -232,4 +232,30 @@ for i, (ax1, ax2) in enumerate(axs):
     sns.despine(offset=10, ax=ax1)
     sns.despine(offset=10, ax=ax2)
 
+# %% [markdown]
+# ## Check logx
+
+# %%
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+sns.regplot(x=x + 0.1, y=y, logx=True, ax=ax1)
+res = gr.regplot(x=x + 0.1, y=y, logx=True, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %% [markdown]
+# ## Check logx with polynomial regression
+
+# %% [markdown]
+# Seaborn doesn't do this.
+
+# %%
+fig, ax = plt.subplots()
+
+order = 3
+res = gr.regplot(x=x + 0.1, y=y, logx=True, order=order, ax=ax)
+
+sns.despine(offset=10, ax=ax)
+
 # %%

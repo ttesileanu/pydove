@@ -22,6 +22,7 @@ def regplot(
     n_points: int = 100,
     seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
     order: int = 1,
+    logx: bool = False,
     truncate: bool = True,
     dropna: bool = True,
     label: Optional[str] = None,
@@ -61,6 +62,10 @@ def regplot(
         Seed or random number generator for jitter.
     order
         If `order` is greater than 1, perform a polynomial regression.
+    logx
+        If true, estimate a linear regression of the form y ~ log(x), but plot the
+        scatter plot and regression model in the input space. Note that `x` must be
+        positive for this to work.
     truncate
         If true, the regression line is bounded by the data limits. Otherwise it extends
         to the x-axis limits.
@@ -108,12 +113,13 @@ def regplot(
     ax = plt.gca() if ax is None else ax
 
     # calculate best-fit line (or polynomial) and interval
+    x_fit0 = x if not logx else np.log(x)
     if order != 1:
         x_fit = np.empty((len(x), order + 1))
         for k in range(order + 1):
-            x_fit[:, k] = x ** k
+            x_fit[:, k] = x_fit0 ** k
     else:
-        x_fit = sm.add_constant(x)
+        x_fit = sm.add_constant(x_fit0)
     fit_results = sm.OLS(y, x_fit).fit()
 
     # figure out what color to use (unless we already know, or we don't draw anything)
@@ -154,12 +160,13 @@ def regplot(
             low_x, high_x = ax.get_xlim()
 
         eval_x = np.linspace(low_x, high_x, n_points)
+        eval_x_fit0 = eval_x if not logx else np.log(eval_x)
         if order != 1:
             eval_x_fit = np.empty((len(x), order + 1))
             for k in range(order + 1):
-                eval_x_fit[:, k] = eval_x ** k
+                eval_x_fit[:, k] = eval_x_fit0 ** k
         else:
-            eval_x_fit = sm.add_constant(eval_x)
+            eval_x_fit = sm.add_constant(eval_x_fit0)
         pred = fit_results.get_prediction(eval_x_fit)
 
         # set up keywords for fit line and error interval
