@@ -208,4 +208,28 @@ res = gr.regplot(x=x, y=y, order=order, ax=ax2)
 sns.despine(offset=10, ax=ax1)
 sns.despine(offset=10, ax=ax2)
 
+# %% [markdown]
+# ## Check jitter
+
+# %%
+fig, axs = plt.subplots(
+    4, 2, figsize=(12, 16), sharex=True, sharey=True, tight_layout=True
+)
+
+for i, (ax1, ax2) in enumerate(axs):
+    kwargs = {"x_jitter": 0.3, "y_jitter": 1.0}
+    if i > 0:
+        kwargs["seed"] = [0, np.random.default_rng(1), np.random.RandomState(2)][i - 1]
+
+    crt_name = ["no seed", "int", "default_rng", "RandomState"][i]
+
+    sns.regplot(x=x, y=y, **kwargs, ax=ax1)
+    res = gr.regplot(x=x, y=y, **kwargs, ax=ax2)
+
+    ax1.set_title("seaborn, " + crt_name)
+    ax2.set_title("pygrutils, " + crt_name)
+
+    sns.despine(offset=10, ax=ax1)
+    sns.despine(offset=10, ax=ax2)
+
 # %%

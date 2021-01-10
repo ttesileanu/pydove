@@ -20,10 +20,13 @@ def regplot(
     fit_reg: bool = True,
     ci: Optional[float] = 95,
     n_points: int = 100,
+    seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
     order: int = 1,
     truncate: bool = True,
     dropna: bool = True,
     label: Optional[str] = None,
+    x_jitter: float = 0,
+    y_jitter: float = 0,
     color: Optional = None,
     marker: Optional = "o",
     scatter_kws: Optional[dict] = None,
@@ -54,6 +57,8 @@ def regplot(
         to avoid drawing the confidence interval.
     n_points
         Number of points to use for drawing the fit line and confidence interval.
+    seed
+        Seed or random number generator for jitter.
     order
         If `order` is greater than 1, perform a polynomial regression.
     truncate
@@ -64,6 +69,14 @@ def regplot(
     label
         Label to apply to either the scatter plot or regression line (if `scatter` is
         false) for use in a legend.
+    x_jitter
+        Amount of uniform random noise to add to the `x` variable. This is added only
+        for the scatter plot, not for calculating the fit line. It's most useful for
+        discrete data.
+    y_jitter
+        Amount of uniform random noise to add to the `y` variable. This is added only
+        for the scatter plot, not for calculating the fit line. It's most useful for
+        discrete data.
     color
         Color to apply to all plot elements; will be superseded by colors passed in
         `scatter_kws` or `line_kws`.
@@ -108,6 +121,17 @@ def regplot(
         h, = ax.plot([], [])
         color = h.get_color()
         h.remove()
+
+    # add jitter, if asked to
+    if not hasattr(seed, "uniform"):
+        rng = np.random.default_rng(seed)
+    else:
+        rng = seed
+        
+    if x_jitter != 0:
+        x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
+    if y_jitter != 0:
+        y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
 
     # make the scatter plot
     if scatter:
