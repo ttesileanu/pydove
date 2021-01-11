@@ -9,13 +9,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.special import erfinv
-from typing import Union, Optional, Sequence, Tuple
+from typing import Union, Optional, Sequence, Tuple, Callable
+from statsmodels.regression.linear_model import RegressionResults
 
 
 def regplot(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,
     data: Optional[pd.DataFrame] = None,
+    x_estimator: Optional[Callable[[Sequence], float]] = None,
     scatter: bool = True,
     fit_reg: bool = True,
     ci: Optional[float] = 95,
@@ -33,8 +35,9 @@ def regplot(
     scatter_kws: Optional[dict] = None,
     line_kws: Optional[dict] = None,
     ci_kws: Optional[dict] = None,
+    x_estimator_ci_kws: Optional[dict] = None,
     ax: Optional[plt.Axes] = None,
-):
+) -> Optional[RegressionResults]:
     """ Version of Seaborn `regplot` that returns fit results.
     
     Parameters
@@ -48,6 +51,10 @@ def regplot(
     data
         Data in Pandas format. `x` and `y` should be strings indicating which columns to
         use for independent and dependent variable, respectively.
+    x_estimator
+        Group samples with the same value of `x` and apply an estimator to collapse all
+        of the corresponding `y`values to a single number. If `x_ci` is given, a
+        confidence interval for each estimate is also calculated and drawn.
     scatter
         If true, draw the scatter plot.
     fit_reg
@@ -94,6 +101,9 @@ def regplot(
     ci_kws
         Additional keyword arguments to pass to `plt.fillbetween` for the confidence
         interval.
+    x_estimator_ci_kws 
+        Additional keyword arguments to pass to `plt.errorbar` for the error bars at
+        each unique value of `x` when `x_estimator` is used.
     ax
         Axes object to draw the plot onto, otherwise uses `plt.gca()`.
 
@@ -102,17 +112,14 @@ def regplot(
     # convert data to a standard form
     x, y = _standardize_data(x=x, y=y, data=data, dropna=dropna)
 
-    # perform some basic checks
-    if len(x) != len(y):
-        raise ValueError("Different length x and y..")
+    # check whether there's anything to do
     if len(x) == 0:
-        # nothing to do
         return
-    
+
     # handle some defaults
     ax = plt.gca() if ax is None else ax
 
-    # calculate best-fit line (or polynomial) and interval
+    # calculate best-fit linear or polynomial model
     x_fit0 = x if not logx else np.log(x)
     if order != 1:
         x_fit = np.empty((len(x), order + 1))
@@ -124,7 +131,7 @@ def regplot(
 
     # figure out what color to use (unless we already know, or we don't draw anything)
     if color is None and (scatter or fit_reg):
-        h, = ax.plot([], [])
+        (h,) = ax.plot([], [])
         color = h.get_color()
         h.remove()
 
@@ -133,11 +140,6 @@ def regplot(
         rng = np.random.default_rng(seed)
     else:
         rng = seed
-        
-    if x_jitter != 0:
-        x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
-    if y_jitter != 0:
-        y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
 
     # make the scatter plot
     if scatter:
@@ -149,7 +151,29 @@ def regplot(
             scatter_kws.setdefault("marker", marker)
         if label is not None:
             scatter_kws.setdefault("label", label)
-        ax.scatter(x, y, **scatter_kws)
+
+        if x_estimator is None:
+            if x_jitter != 0:
+                x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
+            if y_jitter != 0:
+                y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
+            ax.scatter(x, y, **scatter_kws)
+        else:
+            # summarize data according to x_estimator
+            xs, xs_idxs = np.unique(x, return_index=True)
+            ygrps = np.split(y, xs_idxs[1:])
+            ys = [x_estimator(y_grp) for y_grp in ygrps]
+            ys_err = [np.std(y_grp) for y_grp in ygrps]
+
+            if x_estimator_ci_kws is None:
+                x_estimator_ci_kws = {}
+            x_estimator_ci_kws.setdefault(
+                "color", scatter_kws.get("c", scatter_kws.get("color", None))
+            )
+            x_estimator_ci_kws.setdefault("elinewidth", 2.0)
+
+            ax.errorbar(xs, ys, yerr=ys_err, ls="none", **x_estimator_ci_kws)
+            ax.scatter(xs, ys, **scatter_kws)
 
     # draw the fit line and confidence interval
     if fit_reg and len(x) > 2:
@@ -182,15 +206,17 @@ def regplot(
 
         # if color is provided in line_kws, use same one in ci_kws (unless overridden)
         color_key = None
-        if not any(_ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]):
+        if not any(
+            _ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]
+        ):
             if "c" in line_kws:
                 color_key = "c"
             elif "color" in line_kws:
                 color_key = "color"
-                
+
             if color_key is not None:
                 ci_kws["facecolor"] = line_kws[color_key]
-                
+
         # draw the fit line and error interval
         mu = pred.predicted_mean
         std = np.sqrt(pred.var_pred_mean)
@@ -208,7 +234,7 @@ def regplot(
         ax.plot(eval_x, pred.predicted_mean, **line_kws)
 
     return fit_results
-    
+
 
 def _standardize_data(
     x: Union[None, str, pd.Series, Sequence] = None,
@@ -216,6 +242,10 @@ def _standardize_data(
     data: Optional[pd.DataFrame] = None,
     dropna: bool = True,
 ) -> Tuple[Sequence, Sequence]:
+    # basic length check
+    if len(x) != len(y):
+        raise ValueError("Different length x and y..")
+
     # trying to avoid copying as much as possible
     if data is not None:
         if dropna:

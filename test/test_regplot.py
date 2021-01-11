@@ -258,4 +258,24 @@ res = gr.regplot(x=x + 0.1, y=y, logx=True, order=order, ax=ax)
 
 sns.despine(offset=10, ax=ax)
 
+# %% [markdown]
+# ## Check x_estimator
+
+# %%
+x_unique = np.linspace(0, 5, 10)
+y_means = -2.5 * x_unique + 0.6
+
+rng = np.random.default_rng(1)
+y_per_x = 8
+y_values = rng.normal(loc=y_means, size=(y_per_x, len(y_means))).T.ravel()
+x_values = np.repeat(x_unique, y_per_x)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+sns.regplot(x=x_values, y=y_values, x_estimator=np.mean, ax=ax1)
+gr.regplot(x=x_values, y=y_values, x_estimator=np.mean, ax=ax2)
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
 # %%
