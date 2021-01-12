@@ -278,4 +278,54 @@ gr.regplot(x=x_values, y=y_values, x_estimator=np.mean, ax=ax2)
 sns.despine(offset=10, ax=ax1)
 sns.despine(offset=10, ax=ax2)
 
+# %% [markdown]
+# ## Test separate `scatter` function
+
+# %%
+df = pd.DataFrame({"x1": x, "x2": y})
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4), tight_layout=True)
+
+gr.scatter("x1", "x2", df, ax=ax1)
+
+gr.scatter("x1", "x2", df, s=4, c="gray", ax=ax2)
+gr.scatter(x, "x2", df, x_jitter=0.02, y_jitter=0.08, ax=ax2)
+
+ax2.set_title("with jitter")
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %%
+fig, ax = plt.subplots()
+
+gr.scatter(x=x_values, y=y_values, x_estimator=np.mean, ax=ax)
+
+sns.despine(offset=10, ax=ax)
+
+# %% [markdown]
+# ## Test separate `fitplot` function
+
+# %%
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4), tight_layout=True)
+
+gr.fitplot(res, ax=ax1)
+gr.fitplot(x_range=(-0.5, 1.5), fit_results=res, ax=ax2)
+gr.fitplot(x=np.linspace(-0.5, 1.5, 4), fit_results=res, ax=ax3)
+
+for ax in [ax1, ax2, ax3]:
+    sns.despine(offset=10, ax=ax)
+
+# %% [markdown]
+# ## Test `fitplot` with `polyfit`
+
+# %%
+fig, ax = plt.subplots()
+
+ax.scatter(x, y)
+poly_res = gr.polyfit(x, y, order=3)
+gr.fitplot(poly_res, ax=ax)
+
+sns.despine(offset=10, ax=ax)
+
 # %%
