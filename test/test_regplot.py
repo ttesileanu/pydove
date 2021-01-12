@@ -287,7 +287,9 @@ df = pd.DataFrame({"x1": x, "x2": y})
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4), tight_layout=True)
 
 gr.scatter("x1", "x2", df, ax=ax1)
-gr.scatter(x, "x2", df, x_jitter=0.5, y_jitter=0.5, ax=ax2)
+
+gr.scatter("x1", "x2", df, s=4, c="gray", ax=ax2)
+gr.scatter(x, "x2", df, x_jitter=0.02, y_jitter=0.08, ax=ax2)
 
 ax2.set_title("with jitter")
 
