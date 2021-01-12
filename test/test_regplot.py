@@ -278,4 +278,27 @@ gr.regplot(x=x_values, y=y_values, x_estimator=np.mean, ax=ax2)
 sns.despine(offset=10, ax=ax1)
 sns.despine(offset=10, ax=ax2)
 
+# %% [markdown]
+# ## Test separate `scatter` function
+
+# %%
+df = pd.DataFrame({"x1": x, "x2": y})
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4), tight_layout=True)
+
+gr.scatter("x1", "x2", df, ax=ax1)
+gr.scatter(x, "x2", df, x_jitter=0.5, y_jitter=0.5, ax=ax2)
+
+ax2.set_title("with jitter")
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
+
+# %%
+fig, ax = plt.subplots()
+
+gr.scatter(x=x_values, y=y_values, x_estimator=np.mean, ax=ax)
+
+sns.despine(offset=10, ax=ax)
+
 # %%

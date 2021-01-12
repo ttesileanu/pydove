@@ -10,7 +10,126 @@ import matplotlib.pyplot as plt
 
 from scipy.special import erfinv
 from typing import Union, Optional, Sequence, Tuple, Callable
+from matplotlib.collections import PathCollection
 from statsmodels.regression.linear_model import RegressionResults
+
+
+def scatter(
+    x: Union[None, str, pd.Series, Sequence] = None,
+    y: Union[None, str, pd.Series, Sequence] = None,
+    data: Optional[pd.DataFrame] = None,
+    x_estimator: Optional[Callable[[Sequence], float]] = None,
+    seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
+    x_jitter: float = 0,
+    y_jitter: float = 0,
+    x_ci_kws: Optional[dict] = None,
+    ax: Optional[plt.Axes] = None,
+    **kwargs,
+) -> PathCollection:
+    """ Make a scatter plot with some Seaborn-like extensions.
+
+    This function basically performs the scatter-plot half of `sns.regplot`.
+
+    Parameters
+    ----------
+    x
+        Data for x-axis (independent variable). This can be the data itself, or a string
+        indicating a column in `data`.
+    y
+        Data for y-axis (dependent variable). This can be the data itself, or a string
+        indicating a column in `data`.
+    data
+        Data in Pandas format. `x` and `y` should be strings indicating which columns to
+        use for independent and dependent variable, respectively.
+    x_estimator
+        Group samples with the same value of `x` and apply an estimator to collapse all
+        of the corresponding `y`values to a single number. If `x_ci` is given, a
+        confidence interval for each estimate is also calculated and drawn.
+    seed
+        Seed or random number generator for jitter.
+    x_jitter
+        Amount of uniform random noise to add to the `x` variable. This is added only
+        for the scatter plot, not for calculating the fit line. It's most useful for
+        discrete data.
+    y_jitter
+        Amount of uniform random noise to add to the `y` variable. This is added only
+        for the scatter plot, not for calculating the fit line. It's most useful for
+        discrete data.
+    x_ci_kws 
+        Additional keyword arguments to pass to `plt.errorbar` for the error bars at
+        each unique value of `x` when `x_estimator` is used.
+    ax
+        Axes object to draw the plot onto, otherwise uses `plt.gca()`.
+    Any additional keyword arguments are passed to `plt.scatter`.
+
+    Returns the output from `plt.scatter`.
+    """
+    # handle some defaults
+    ax = plt.gca() if ax is None else ax
+
+    # figure out what color to use (unless we already know)
+    if "c" not in kwargs and "color" not in kwargs:
+        (h,) = ax.plot([], [])
+        kwargs["color"] = h.get_color()
+        h.remove()
+
+    # standardize data
+    x, y = _standardize_data(x, y, data, dropna=False)
+
+    # prepare data (jitter, grouping)
+    xs, ys, ys_err = _prepare_data(
+        x, y, seed=seed, x_jitter=x_jitter, y_jitter=y_jitter, x_estimator=x_estimator
+    )
+
+    # make the scatter plot
+    kwargs.setdefault("alpha", 0.8)
+    h = ax.scatter(xs, ys, **kwargs)
+
+    # draw the error bars, if they exist
+    if ys_err is not None:
+        x_ci_kws = {} if x_ci_kws is None else x_ci_kws
+        color = kwargs.get("c", kwargs.get("color", None))
+        # XXX this won't work with vector color
+        x_ci_kws.setdefault("color", color)
+        x_ci_kws.setdefault("elinewidth", 2.0)
+
+        ax.errorbar(xs, ys, yerr=ys_err, ls="none", **x_ci_kws)
+
+    return h
+
+
+def _prepare_data(
+    x: Sequence,
+    y: Sequence,
+    seed: Union[int, np.random.Generator, np.random.RandomState],
+    x_jitter: float,
+    y_jitter: float,
+    x_estimator: Optional[Callable[[Sequence], float]],
+) -> Tuple[Sequence, Sequence, Optional[Sequence]]:
+    # add jitter, if asked to
+    if x_estimator is None and (x_jitter != 0 or y_jitter != 0):
+        if not hasattr(seed, "uniform"):
+            rng = np.random.default_rng(seed)
+        else:
+            rng = seed
+
+        if x_jitter != 0:
+            x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
+        if y_jitter != 0:
+            y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
+
+    # summarize data according to x_estimator, if asked to
+    if x_estimator is not None:
+        xs, xs_idxs = np.unique(x, return_index=True)
+        ygrps = np.split(y, xs_idxs[1:])
+        ys = [x_estimator(y_grp) for y_grp in ygrps]
+        ys_err = [np.std(y_grp) for y_grp in ygrps]
+    else:
+        xs = x
+        ys = y
+        ys_err = None
+
+    return xs, ys, ys_err
 
 
 def regplot(
