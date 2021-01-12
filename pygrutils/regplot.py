@@ -91,8 +91,13 @@ def scatter(
     # draw the error bars, if they exist
     if ys_err is not None:
         x_ci_kws = {} if x_ci_kws is None else x_ci_kws
-        color = kwargs.get("c", kwargs.get("color", None))
         # XXX this won't work with vector color
+        if "c" in kwargs:
+            color = kwargs["c"]
+        else:
+            # if this wasn't given explicitly, it was set above
+            color = kwargs["color"]
+
         x_ci_kws.setdefault("color", color)
         x_ci_kws.setdefault("elinewidth", 2.0)
 
