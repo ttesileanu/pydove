@@ -36,10 +36,12 @@ def regplot(
     scatter_kws: Optional[dict] = None,
     line_kws: Optional[dict] = None,
     ci_kws: Optional[dict] = None,
-    x_estimator_ci_kws: Optional[dict] = None,
+    x_ci_kws: Optional[dict] = None,
     ax: Optional[plt.Axes] = None,
 ) -> Optional[RegressionResults]:
     """ Version of Seaborn `regplot` that returns fit results.
+
+    This uses `gr.scatter` with `gr.polyfit` and `gr.fitplot`.
     
     Parameters
     ----------
@@ -102,13 +104,13 @@ def regplot(
     ci_kws
         Additional keyword arguments to pass to `plt.fillbetween` for the confidence
         interval.
-    x_estimator_ci_kws 
+    x_ci_kws 
         Additional keyword arguments to pass to `plt.errorbar` for the error bars at
         each unique value of `x` when `x_estimator` is used.
     ax
         Axes object to draw the plot onto, otherwise uses `plt.gca()`.
 
-    Returns the results from `sm.OLS.fit()`.
+    Returns the results from `gr.polyfit`, or `None` if the data is empty.
     """
     # convert data to a standard form
     x, y = _standardize_data(x=x, y=y, data=data, dropna=dropna)
@@ -120,119 +122,66 @@ def regplot(
     # handle some defaults
     ax = plt.gca() if ax is None else ax
 
-    # calculate best-fit linear or polynomial model
-    x_fit0 = x if not logx else np.log(x)
-    if order != 1:
-        x_fit = np.empty((len(x), order + 1))
-        for k in range(order + 1):
-            x_fit[:, k] = x_fit0 ** k
-    else:
-        x_fit = sm.add_constant(x_fit0)
-    fit_results = sm.OLS(y, x_fit).fit()
-
-    # figure out what color to use (unless we already know, or we don't draw anything)
-    if color is None and (scatter or fit_reg):
+    # figure out what color to use (unless we already know)
+    if color is None:
         (h,) = ax.plot([], [])
         color = h.get_color()
         h.remove()
 
-    # add jitter, if asked to
-    if not hasattr(seed, "uniform"):
-        rng = np.random.default_rng(seed)
-    else:
-        rng = seed
-
     # make the scatter plot
     if scatter:
+        # set up the keywords
         scatter_kws = {} if scatter_kws is None else scatter_kws
         scatter_kws.setdefault("alpha", 0.8)
         if "c" not in scatter_kws and "color" not in scatter_kws:
-            scatter_kws.setdefault("c", color)
+            scatter_kws["color"] = color
         if marker is not None:
             scatter_kws.setdefault("marker", marker)
         if label is not None:
             scatter_kws.setdefault("label", label)
 
-        if x_estimator is None:
-            if x_jitter != 0:
-                x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
-            if y_jitter != 0:
-                y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
-            ax.scatter(x, y, **scatter_kws)
-        else:
-            # summarize data according to x_estimator
-            xs, xs_idxs = np.unique(x, return_index=True)
-            ygrps = np.split(y, xs_idxs[1:])
-            ys = [x_estimator(y_grp) for y_grp in ygrps]
-            ys_err = [np.std(y_grp) for y_grp in ygrps]
+        # plot
+        _scatter(
+            x=x,
+            y=y,
+            x_estimator=x_estimator,
+            seed=seed,
+            x_jitter=x_jitter,
+            y_jitter=y_jitter,
+            x_ci_kws=x_ci_kws,
+            **scatter_kws,
+            ax=ax,
+        )
 
-            if x_estimator_ci_kws is None:
-                x_estimator_ci_kws = {}
-            x_estimator_ci_kws.setdefault(
-                "color", scatter_kws.get("c", scatter_kws.get("color", None))
-            )
-            x_estimator_ci_kws.setdefault("elinewidth", 2.0)
-
-            ax.errorbar(xs, ys, yerr=ys_err, ls="none", **x_estimator_ci_kws)
-            ax.scatter(xs, ys, **scatter_kws)
+    # calculate the fit
+    fit_results = polyfit(x=x, y=y, order=order, logx=logx, with_constant=True)
 
     # draw the fit line and confidence interval
-    if fit_reg and len(x) > 2:
+    if fit_reg:
+        # figure out where to draw the line
         if truncate:
-            low_x = np.min(x)
-            high_x = np.max(x)
+            low_x, high_x = np.min(x), np.max(x)
         else:
             low_x, high_x = ax.get_xlim()
 
-        eval_x = np.linspace(low_x, high_x, n_points)
-        eval_x_fit0 = eval_x if not logx else np.log(eval_x)
-        if order != 1:
-            eval_x_fit = np.empty((len(x), order + 1))
-            for k in range(order + 1):
-                eval_x_fit[:, k] = eval_x_fit0 ** k
-        else:
-            eval_x_fit = sm.add_constant(eval_x_fit0)
-        pred = fit_results.get_prediction(eval_x_fit)
-
-        # set up keywords for fit line and error interval
-        ci_kws = {} if ci_kws is None else ci_kws
+        # set up the keywords
         line_kws = {} if line_kws is None else line_kws
-
         if "c" not in line_kws and "color" not in line_kws:
             line_kws["color"] = color
-
-        ci_kws.setdefault("alpha", 0.15)
-        if "ec" not in ci_kws and "edgecolor" not in ci_kws:
-            ci_kws["ec"] = "none"
-
-        # if color is provided in line_kws, use same one in ci_kws (unless overridden)
-        color_key = None
-        if not any(
-            _ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]
-        ):
-            if "c" in line_kws:
-                color_key = "c"
-            elif "color" in line_kws:
-                color_key = "color"
-
-            if color_key is not None:
-                ci_kws["facecolor"] = line_kws[color_key]
-
-        # draw the fit line and error interval
-        mu = pred.predicted_mean
-        std = np.sqrt(pred.var_pred_mean)
-
-        # find out what multiple of the standard deviation to use (if any)
-        if ci is not None:
-            n_std = np.sqrt(2) * erfinv(ci / 100)
-            err = n_std * std
-            ax.fill_between(eval_x, mu - err, mu + err, **ci_kws)
-
-        if "lw" not in line_kws and "linewidth" not in line_kws:
-            line_kws["lw"] = 2.0
         if label is not None and not scatter:
-            line_kws.setdefault("label", label)
-        ax.plot(eval_x, pred.predicted_mean, **line_kws)
+            line_kws["label"] = label
+
+        # plot
+        fitplot(
+            fit_results,
+            x_range=(low_x, high_x),
+            logx=logx,
+            ci=ci,
+            n_points=n_points,
+            ci_kws=ci_kws,
+            ax=ax,
+            **line_kws,
+        )
 
     return fit_results
 
@@ -329,6 +278,10 @@ def scatter(
     return h
 
 
+# creating an alias because the `scatter` kwarg of regplot shadows this function...
+_scatter = scatter
+
+
 def fitplot(
     fit_results: RegressionResults,
     x_range: Optional[Tuple] = None,
@@ -380,7 +333,7 @@ def fitplot(
     # figure out the order of the fit
     has_constant = fit_results.k_constant
     order = len(fit_results.params) - has_constant
-    
+
     # figure out the x values to use
     if x is None:
         if x_range is None:
@@ -396,7 +349,7 @@ def fitplot(
 
     # build the matrix of predictor variables
     exog_fit = _build_poly_exog(x, order, has_constant, logx=logx)
-        
+
     # calculate the predictions
     pred = fit_results.get_prediction(exog_fit)
     mu = pred.predicted_mean
@@ -422,9 +375,7 @@ def fitplot(
         ci_kws["ec"] = "none"
 
     # use same color for confidence interval as for fit line (unless overridden)
-    if not any(
-        _ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]
-    ):
+    if not any(_ in ci_kws for _ in ["c", "color", "facecolor", "facecolors", "fc"]):
         ci_kws["facecolor"] = color
 
     # draw confidence interval, if available
@@ -474,7 +425,7 @@ def polyfit(
     # ensure we have data
     if len(x) == 0:
         raise ValueError("Data is empty, cannot fit.")
-        
+
     # perform the fit
     exog = _build_poly_exog(x, order, has_constant=with_constant, logx=logx)
     fit_results = sm.OLS(y, exog).fit()
