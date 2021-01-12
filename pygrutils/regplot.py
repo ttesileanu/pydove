@@ -395,10 +395,7 @@ def fitplot(
         x = np.linspace(x_range[0], x_range[1], n_points)
 
     # build the matrix of predictor variables
-    exog_fit1 = x if not logx else np.log(x)
-    exog_fit = np.empty((len(x), order + has_constant))
-    for k in range(order + has_constant):
-        exog_fit[:, k] = exog_fit1 ** (k + (1 - has_constant))
+    exog_fit = _build_poly_exog(x, order, has_constant, logx=logx)
         
     # calculate the predictions
     pred = fit_results.get_prediction(exog_fit)
@@ -496,3 +493,15 @@ def _prepare_data(
         ys_err = None
 
     return xs, ys, ys_err
+
+
+def _build_poly_exog(
+    x: Sequence, order: int, has_constant: Union[bool, int], logx: bool
+) -> np.ndarray:
+    # build the matrix of predictor variables
+    exog1 = np.asarray(x) if not logx else np.log(x)
+    exog = np.empty((len(x), order + has_constant))
+    for k in range(order + has_constant):
+        exog[:, k] = exog1 ** (k + (1 - has_constant))
+
+    return exog
