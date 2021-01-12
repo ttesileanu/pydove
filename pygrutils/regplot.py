@@ -432,6 +432,56 @@ def fitplot(
         ax.fill_between(x, mu - err, mu + err, **ci_kws)
 
 
+def polyfit(
+    x: Union[None, str, pd.Series, Sequence] = None,
+    y: Union[None, str, pd.Series, Sequence] = None,
+    data: Optional[pd.DataFrame] = None,
+    dropna: bool = True,
+    order: int = 1,
+    logx: bool = False,
+    with_constant: bool = True,
+) -> RegressionResults:
+    """ Perform a polynomial fit using `statsmodels`.
+
+    Parameters
+    ----------
+    x
+        Data for x-axis (independent variable). This can be the data itself, or a string
+        indicating a column in `data`.
+    y
+        Data for y-axis (dependent variable). This can be the data itself, or a string
+        indicating a column in `data`.
+    data
+        Data in Pandas format. `x` and `y` should be strings indicating which columns to
+        use for independent and dependent variable, respectively.
+    dropna
+        Drop any observations in which either `x` or `y` is not-a-number.
+    order
+        If `order` is greater than 1, perform a polynomial regression.
+    logx
+        If true, estimate a linear regression of the form y ~ log(x), but plot the
+        scatter plot and regression model in the input space. Note that `x` must be
+        positive for this to work.
+    with_constant
+        If true, include a constant term in the fit.
+
+    Returns a `statsmodels` regression results object. A `ValueError` exception is
+    raised if the length of the data is zero.
+    """
+    # standardize data
+    x, y = _standardize_data(x, y, data, dropna=dropna)
+
+    # ensure we have data
+    if len(x) == 0:
+        raise ValueError("Data is empty, cannot fit.")
+        
+    # perform the fit
+    exog = _build_poly_exog(x, order, has_constant=with_constant, logx=logx)
+    fit_results = sm.OLS(y, exog).fit()
+
+    return fit_results
+
+
 def _standardize_data(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,

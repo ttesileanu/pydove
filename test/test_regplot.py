@@ -316,4 +316,16 @@ gr.fitplot(x=np.linspace(-0.5, 1.5, 4), fit_results=res, ax=ax3)
 for ax in [ax1, ax2, ax3]:
     sns.despine(offset=10, ax=ax)
 
+# %% [markdown]
+# ## Test `fitplot` with `polyfit`
+
+# %%
+fig, ax = plt.subplots()
+
+ax.scatter(x, y)
+poly_res = gr.polyfit(x, y, order=3)
+gr.fitplot(poly_res, ax=ax)
+
+sns.despine(offset=10, ax=ax)
+
 # %%
