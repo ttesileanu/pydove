@@ -242,26 +242,24 @@ def _standardize_data(
     data: Optional[pd.DataFrame] = None,
     dropna: bool = True,
 ) -> Tuple[Sequence, Sequence]:
+    # handle dataframe vs. sequence inputs, trying to avoid copying as much as possible
+    if isinstance(x, str):
+        x = data[x]
+    if isinstance(y, str):
+        y = data[y]
+
     # basic length check
     if len(x) != len(y):
         raise ValueError("Different length x and y..")
 
-    # trying to avoid copying as much as possible
-    if data is not None:
-        if dropna:
-            # drop NaNs
-            data = data.dropna()
+    # drop invalid values if asked to
+    if dropna:
+        x = np.asarray(x)
+        y = np.asarray(y)
 
-        x = data[x].values
-        y = data[y].values
-    else:
-        if dropna:
-            # drop NaNs
-            x = np.asarray(x)
-            y = np.asarray(y)
+        mask = ~(pd.isnull(x) | pd.isnull(y))
 
-            mask = np.isnan(x) | np.isnan(y)
-            x = x[~mask]
-            y = y[~mask]
+        x = x[mask]
+        y = y[mask]
 
     return x, y
