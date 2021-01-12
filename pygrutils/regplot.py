@@ -101,40 +101,6 @@ def scatter(
     return h
 
 
-def _prepare_data(
-    x: Sequence,
-    y: Sequence,
-    seed: Union[int, np.random.Generator, np.random.RandomState],
-    x_jitter: float,
-    y_jitter: float,
-    x_estimator: Optional[Callable[[Sequence], float]],
-) -> Tuple[Sequence, Sequence, Optional[Sequence]]:
-    # add jitter, if asked to
-    if x_estimator is None and (x_jitter != 0 or y_jitter != 0):
-        if not hasattr(seed, "uniform"):
-            rng = np.random.default_rng(seed)
-        else:
-            rng = seed
-
-        if x_jitter != 0:
-            x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
-        if y_jitter != 0:
-            y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
-
-    # summarize data according to x_estimator, if asked to
-    if x_estimator is not None:
-        xs, xs_idxs = np.unique(x, return_index=True)
-        ygrps = np.split(y, xs_idxs[1:])
-        ys = [x_estimator(y_grp) for y_grp in ygrps]
-        ys_err = [np.std(y_grp) for y_grp in ygrps]
-    else:
-        xs = x
-        ys = y
-        ys_err = None
-
-    return xs, ys, ys_err
-
-
 def regplot(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,
@@ -385,3 +351,37 @@ def _standardize_data(
         y = y[mask]
 
     return x, y
+
+
+def _prepare_data(
+    x: Sequence,
+    y: Sequence,
+    seed: Union[int, np.random.Generator, np.random.RandomState],
+    x_jitter: float,
+    y_jitter: float,
+    x_estimator: Optional[Callable[[Sequence], float]],
+) -> Tuple[Sequence, Sequence, Optional[Sequence]]:
+    # add jitter, if asked to
+    if x_estimator is None and (x_jitter != 0 or y_jitter != 0):
+        if not hasattr(seed, "uniform"):
+            rng = np.random.default_rng(seed)
+        else:
+            rng = seed
+
+        if x_jitter != 0:
+            x = np.asarray(x) + rng.uniform(-x_jitter, x_jitter, size=len(x))
+        if y_jitter != 0:
+            y = np.asarray(y) + rng.uniform(-y_jitter, y_jitter, size=len(y))
+
+    # summarize data according to x_estimator, if asked to
+    if x_estimator is not None:
+        xs, xs_idxs = np.unique(x, return_index=True)
+        ygrps = np.split(y, xs_idxs[1:])
+        ys = [x_estimator(y_grp) for y_grp in ygrps]
+        ys_err = [np.std(y_grp) for y_grp in ygrps]
+    else:
+        xs = x
+        ys = y
+        ys_err = None
+
+    return xs, ys, ys_err
