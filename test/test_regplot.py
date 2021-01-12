@@ -303,4 +303,17 @@ gr.scatter(x=x_values, y=y_values, x_estimator=np.mean, ax=ax)
 
 sns.despine(offset=10, ax=ax)
 
+# %% [markdown]
+# ## Test separate `fitplot` function
+
+# %%
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4), tight_layout=True)
+
+gr.fitplot(res, ax=ax1)
+gr.fitplot(x_range=(-0.5, 1.5), fit_results=res, ax=ax2)
+gr.fitplot(x=np.linspace(-0.5, 1.5, 4), fit_results=res, ax=ax3)
+
+for ax in [ax1, ax2, ax3]:
+    sns.despine(offset=10, ax=ax)
+
 # %%
