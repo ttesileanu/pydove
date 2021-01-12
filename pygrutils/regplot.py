@@ -18,6 +18,7 @@ def scatter(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,
     data: Optional[pd.DataFrame] = None,
+    dropna: bool = True,
     x_estimator: Optional[Callable[[Sequence], float]] = None,
     seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
     x_jitter: float = 0,
@@ -41,6 +42,8 @@ def scatter(
     data
         Data in Pandas format. `x` and `y` should be strings indicating which columns to
         use for independent and dependent variable, respectively.
+    dropna
+        Drop any observations in which either `x` or `y` is not-a-number.
     x_estimator
         Group samples with the same value of `x` and apply an estimator to collapse all
         of the corresponding `y`values to a single number. If `x_ci` is given, a
@@ -74,7 +77,7 @@ def scatter(
         h.remove()
 
     # standardize data
-    x, y = _standardize_data(x, y, data, dropna=False)
+    x, y = _standardize_data(x, y, data, dropna=dropna)
 
     # prepare data (jitter, grouping)
     xs, ys, ys_err = _prepare_data(
