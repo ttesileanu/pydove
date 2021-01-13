@@ -11,5 +11,8 @@ setup(
         "setuptools",
         "statsmodels",
         "matplotlib",
+        "seaborn",
+        "numpy",
+        "scipy",
     ],
 )
