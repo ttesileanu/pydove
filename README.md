@@ -1,5 +1,8 @@
 # pygrutils: an assortment of graphics utilities
 
+![version](https://img.shields.io/badge/version-v0.1.1-blue)
+[![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 This is an assortment of utilities for plotting in Python using `Matplotlib` and `seaborn`. Below are some highlights.
 
 ## Features
