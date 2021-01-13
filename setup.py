@@ -6,10 +6,13 @@ setup(
     author="Tiberiu Tesileanu",
     author_email="ttesileanu@gmail.com",
     url="https://github.com/ttesileanu/pygrutils",
-    packages=["pystanic"],
+    packages=["pygrutils"],
     install_requires=[
         "setuptools",
         "statsmodels",
         "matplotlib",
+        "seaborn",
+        "numpy",
+        "scipy",
     ],
 )
