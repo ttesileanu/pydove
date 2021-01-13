@@ -20,6 +20,8 @@
 # %load_ext autoreload
 # %autoreload 2
 
+import time
+
 import numpy as np
 import pandas as pd
 
@@ -327,5 +329,27 @@ poly_res = gr.polyfit(x, y, order=3)
 gr.fitplot(poly_res, ax=ax)
 
 sns.despine(offset=10, ax=ax)
+
+# %% [markdown]
+# ## Test speed
+
+# %%
+rng = np.random.default_rng(0)
+big_n = 100_000
+big_x = np.linspace(0, 1, big_n)
+big_y = alpha * big_x + beta + sigma * rng.normal(size=big_n)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+t0 = time.time()
+sns.regplot(x=big_x, y=big_y, scatter_kws={"alpha": 0.02}, ax=ax1)
+t1 = time.time()
+print(f"sns.regplot took {t1 - t0:.2f} seconds.")
+res = gr.regplot(x=big_x, y=big_y, scatter_kws={"alpha": 0.02}, ax=ax2)
+t2 = time.time()
+print(f"gr.regplot took {t2 - t1:.2f} seconds.")
+
+sns.despine(offset=10, ax=ax1)
+sns.despine(offset=10, ax=ax2)
 
 # %%
