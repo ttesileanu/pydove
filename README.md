@@ -4,9 +4,27 @@
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ttesileanu/pygrutils.svg)](https://lgtm.com/projects/g/ttesileanu/pygrutils/context:python)
 
-This is an assortment of utilities for plotting in Python using [`Matplotlib`](https://matplotlib.org/) and [`seaborn`](https://seaborn.pydata.org/generated/seaborn.regplot.html?highlight=regplot#seaborn.regplot). Below are some highlights.
+This is an assortment of utilities for plotting in Python using [`matplotlib`](https://matplotlib.org/) and [`seaborn`](https://seaborn.pydata.org/generated/seaborn.regplot.html?highlight=regplot#seaborn.regplot). Below are some highlights.
 
 ## Features
+
+### A figure manager
+
+The default `matplotlib` figure uses a box around the figure. For most plots I find this to be both a waste of ink and a bit ugly. It can also make it hard to see points close to the edges of the figure. For these reasons, I usually use the [`despine`](https://seaborn.pydata.org/generated/seaborn.despine.html?highlight=despine#seaborn.despine) function from `seaborn` to remove the right and upper segments of the figure box, and also to add a bit of an offset between the remaining spines. Like this:
+
+<img src="img/figure_manager_example.png" width="850px" />
+
+To automate this behavior, I created `FigureManager`, a context manager that basically calls `plt.subplots`, but also applies `despine` to the axes upon exit. For instance, the figure above can be obtained using:
+
+    import numpy as np
+    from pygrutils import FigureManager
+
+    with FigureManager(1, 2) as (_, axs):
+        x = np.linspace(0, 10, 100)
+        for i, ax in enumerate(axs):
+            ax.plot(x, np.sin(x), c=f"C{i}")
+
+Note that the `FigureManager` also scales the figure size when using multiple panels so that each panel is the same size as the default figure. This is in contrast to `matplotlib`'s default behavior which is to keep the figure size fixed. The behavior of the `FigureManager` is fully configurable -- see the docstring and the example notebook in the `test` folder for details.
 
 ### A more useful `regplot`
 
