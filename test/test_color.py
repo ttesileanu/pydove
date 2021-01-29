@@ -32,7 +32,7 @@ import pygrutils as gr
 rng = np.random.default_rng(0)
 with gr.FigureManager() as (_, ax):
     n = 500
-    x = rng.normal(size=n)
+    x = rng.uniform(size=n)
     y = rng.uniform(size=n)
     h = ax.scatter(x, y, c=y)
     gr.colorbar(h)

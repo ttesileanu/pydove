@@ -44,6 +44,22 @@ There are some things that this `regplot` function does better than `sns.regplot
   * the number of points used for the fit line and confidence interval is configurable;
   * separate keyword options for confidence intervals are supported.
 
+### Colorbar and colormap functions
+
+The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
+
+    import pygrutils as gr
+
+    rng = np.random.default_rng(0)
+    with gr.FigureManager() as (_, ax):
+        n = 500
+        x = rng.uniform(size=n)
+        y = rng.uniform(size=n)
+        h = ax.scatter(x, y, c=y)
+        gr.colorbar(h)
+
+<img src="img/colorbar_example.png" width="425px" />
+
 ## Installation
 
 After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
