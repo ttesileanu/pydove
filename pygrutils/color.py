@@ -1,5 +1,7 @@
 """ Define color-related functions. """
 
+import matplotlib.colors as mplc
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
@@ -51,3 +53,31 @@ def colorbar(
 
     # make and return the colorbar
     return fig.colorbar(mappable, cax=cax, **kwargs)
+
+
+def gradient_cmap(name: str, c1, c2, **kwargs) -> mplc.Colormap:
+    """ Make a colormap that interpolates between two given colors.
+
+    Parameters
+    ----------
+    name
+        Name to give the colormap.
+    c1
+        Starting color. This can be in any format recognized by Matplotlib.
+    c2
+        Final color. This can be in any format recognized by Matplotlib.
+
+    Returns the `Colormap` object.
+    """
+    rgba1 = mplc.to_rgba(c1)
+    rgba2 = mplc.to_rgba(c2)
+
+    segments = {
+        "red": [[0.0, 0.0, rgba1[0]], [1.0, rgba2[0], 0.0]],
+        "green": [[0.0, 0.0, rgba1[1]], [1.0, rgba2[1], 0.0]],
+        "blue": [[0.0, 0.0, rgba1[2]], [1.0, rgba2[2], 0.0]],
+        "alpha": [[0.0, 0.0, rgba1[3]], [1.0, rgba2[3], 0.0]],
+    }
+
+    cmap = mplc.LinearSegmentedColormap(name, segmentdata=segments, **kwargs)
+    return cmap

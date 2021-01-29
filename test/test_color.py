@@ -49,4 +49,15 @@ with gr.FigureManager() as (_, ax):
     h = ax.scatter(x, y, c=x + y, cmap="Reds")
     gr.colorbar(h, fraction=0.1, pad=1.0, location="left")
 
+# %% [markdown]
+# ## Custom gradient color map
+
+# %%
+rng = np.random.default_rng(0)
+with gr.FigureManager() as (_, ax):
+    h = ax.imshow(
+        rng.uniform(size=(20, 20)), cmap=gr.gradient_cmap("C0_to_C1", "C0", "C1")
+    )
+    gr.colorbar(h)
+
 # %%

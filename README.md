@@ -48,6 +48,7 @@ There are some things that this `regplot` function does better than `sns.regplot
 
 The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
 
+    import numpy as np
     import pygrutils as gr
 
     rng = np.random.default_rng(0)
@@ -59,6 +60,20 @@ The default colorbar function in `matplotlib` is not always easy to use and ofte
         gr.colorbar(h)
 
 <img src="img/colorbar_example.png" width="425px" />
+
+Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `gr.gradient_cmap` makes it easy:
+
+    import numpy as np
+    import pygrutils as gr
+
+    rng = np.random.default_rng(0)
+    with gr.FigureManager() as (_, ax):
+        h = ax.imshow(
+            rng.uniform(size=(20, 20)), cmap=gr.gradient_cmap("C0_to_C1", "C0", "C1")
+        )
+        gr.colorbar(h)
+
+<img src="img/gradient_cmap_example.png" width="425px" />
 
 ## Installation
 
