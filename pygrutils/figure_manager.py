@@ -78,4 +78,3 @@ class FigureManager(object):
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if self.do_despine:
             self._despine(self.ax)
-
