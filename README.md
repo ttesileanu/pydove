@@ -51,12 +51,12 @@ The basic usage is identical to `seaborn`, *e.g.*:
 
 will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
 
-![regplot example](img/regplot_example.png)
+<img src="img/regplot_example.png" width="370px" />
 
 The `statsmodels` results structure contains a wealth of information:
 
     res.summary()
 
-![regplot example stats](img/regplot_example_stats.png)
+<img src="img/regplot_example_stats.png" width="425px" />
 
 More examples can be found in the notebooks in the `test` folder.
