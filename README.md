@@ -75,6 +75,38 @@ Sometimes it is useful to define a color map that interpolates between two given
 
 <img src="img/gradient_cmap_example.png" width="425px" />
 
+### Plotting
+
+Sometimes it is useful to generate a line plot with varying colors. This can be done like this:
+
+    import numpy as np
+    import pygrutils as gr
+
+    custom_cmap = gr.gradient_cmap("custom_cmap", "C0", "C1")
+    with gr.FigureManager(1, 2) as (_, (ax1, ax2)):
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+        c = y
+        ax1.axhline(0, color="gray", ls=":")
+        gr.color_plot(x, y, c, cmap=custom_cmap, ax=ax1)
+        ax1.autoscale()
+
+        c = np.linspace(0, 6 * np.pi, 250)
+        r = np.linspace(1, 4, len(c)) ** 2
+        x = r * np.cos(c)
+        y = r * np.sin(c)
+        ax2.axhline(0, color="gray", ls=":", lw=0.5)
+        ax2.axvline(0, color="gray", ls=":", lw=0.5)
+        gr.color_plot(x, y, c, ax=ax2)
+
+        max_r = np.max(r)
+        ax2.set_xlim(-max_r, max_r)
+        ax2.set_ylim(-max_r, max_r)
+
+        ax2.set_aspect(1)
+
+<img src="img/color_plot_example.png" width="780px" />
+
 ## Installation
 
 After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
