@@ -1,1 +1,1 @@
-from pygrutils.regplot import *
+from pygrutils.regplot import regplot, scatter, fitplot, polyfit
