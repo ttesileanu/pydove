@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name="pygrutils",
-    version="0.1.1",
+    version="0.1.5",
     author="Tiberiu Tesileanu",
     author_email="ttesileanu@gmail.com",
     url="https://github.com/ttesileanu/pygrutils",
