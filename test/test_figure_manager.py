@@ -33,7 +33,16 @@ with FigureManager() as (_, ax):
     ax.scatter(rng.normal(size=50), rng.normal(size=50))
 
 # %% [markdown]
-# ## Multiple panels
+# ## Two panels
+
+# %%
+with FigureManager(1, 2) as (_, axs):
+    x = np.linspace(0, 10, 100)
+    for i, ax in enumerate(axs):
+        ax.plot(x, np.sin(x), c=f"C{i}")
+
+# %% [markdown]
+# ## More panels
 
 # %% [markdown]
 # The context manager scales the figure size according to the number of panels so that each panel is the size of a standard figure.
