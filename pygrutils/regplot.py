@@ -1,8 +1,6 @@
 """ Define a function that combines a scatter plot with a regression curve. """
 
 
-import copy
-
 import statsmodels.api as sm
 import pandas as pd
 import numpy as np
