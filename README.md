@@ -46,6 +46,37 @@ There are some things that this `regplot` function does better than `sns.regplot
   * the number of points used for the fit line and confidence interval is configurable;
   * separate keyword options for confidence intervals are supported.
 
+The basic usage is identical to `seaborn`, *e.g.*:
+
+```python
+import matplotlib.pyplot as plt
+import pygrutils as gr
+import numpy as np
+
+# generate some data
+rng = np.random.default_rng(0)
+x = np.linspace(0, 1, 100)
+y = 3.0 * x - 0.15 + rng.normal(size=len(x))
+
+# plot it
+fig, ax = plt.subplots()
+res = gr.regplot(x, y, order=2, ax=ax)
+```
+
+will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
+
+<img src="img/regplot_example.png" width="370px" />
+
+The `statsmodels` results structure contains a wealth of information:
+
+```python
+res.summary()
+```
+
+<img src="img/regplot_example_stats.png" width="425px" />
+
+More examples can be found in the notebooks in the `test` folder.
+
 ### Colorbar and colormap functions
 
 The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
@@ -122,36 +153,3 @@ After cloning the repository or downloading and decompressing, run the following
 ```python
 pip install .
 ```
-
-## Usage
-
-The basic usage is identical to `seaborn`, *e.g.*:
-
-```python
-import matplotlib.pyplot as plt
-import pygrutils as gr
-import numpy as np
-
-# generate some data
-rng = np.random.default_rng(0)
-x = np.linspace(0, 1, 100)
-y = 3.0 * x - 0.15 + rng.normal(size=len(x))
-
-# plot it
-fig, ax = plt.subplots()
-res = gr.regplot(x, y, order=2, ax=ax)
-```
-
-will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
-
-<img src="img/regplot_example.png" width="370px" />
-
-The `statsmodels` results structure contains a wealth of information:
-
-```python
-res.summary()
-```
-
-<img src="img/regplot_example_stats.png" width="425px" />
-
-More examples can be found in the notebooks in the `test` folder.
