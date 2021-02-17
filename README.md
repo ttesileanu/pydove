@@ -16,13 +16,15 @@ The default `matplotlib` figure uses a box around the figure. For most plots I f
 
 To automate this behavior, I created `FigureManager`, a context manager that basically calls `plt.subplots`, but also applies `despine` to the axes upon exit. For instance, the figure above can be obtained using:
 
-    import numpy as np
-    from pygrutils import FigureManager
+```python
+import numpy as np
+from pygrutils import FigureManager
 
-    with FigureManager(1, 2) as (_, axs):
-        x = np.linspace(0, 10, 100)
-        for i, ax in enumerate(axs):
-            ax.plot(x, np.sin(x), c=f"C{i}")
+with FigureManager(1, 2) as (_, axs):
+    x = np.linspace(0, 10, 100)
+    for i, ax in enumerate(axs):
+        ax.plot(x, np.sin(x), c=f"C{i}")
+```
 
 Note that the `FigureManager` also scales the figure size when using multiple panels so that each panel is the same size as the default figure. This is in contrast to `matplotlib`'s default behavior which is to keep the figure size fixed. The behavior of the `FigureManager` is fully configurable -- see the docstring and the example notebook in the `test` folder for details.
 
@@ -44,91 +46,22 @@ There are some things that this `regplot` function does better than `sns.regplot
   * the number of points used for the fit line and confidence interval is configurable;
   * separate keyword options for confidence intervals are supported.
 
-### Colorbar and colormap functions
-
-The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
-
-    import numpy as np
-    import pygrutils as gr
-
-    rng = np.random.default_rng(0)
-    with gr.FigureManager() as (_, ax):
-        n = 500
-        x = rng.uniform(size=n)
-        y = rng.uniform(size=n)
-        h = ax.scatter(x, y, c=y)
-        gr.colorbar(h)
-
-<img src="img/colorbar_example.png" width="425px" />
-
-Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `gr.gradient_cmap` makes it easy:
-
-    import numpy as np
-    import pygrutils as gr
-
-    rng = np.random.default_rng(0)
-    with gr.FigureManager() as (_, ax):
-        h = ax.imshow(
-            rng.uniform(size=(20, 20)), cmap=gr.gradient_cmap("C0_to_C1", "C0", "C1")
-        )
-        gr.colorbar(h)
-
-<img src="img/gradient_cmap_example.png" width="425px" />
-
-### Plotting
-
-Sometimes it is useful to generate a line plot with varying colors. This can be done like this:
-
-    import numpy as np
-    import pygrutils as gr
-
-    custom_cmap = gr.gradient_cmap("custom_cmap", "C0", "C1")
-    with gr.FigureManager(1, 2) as (_, (ax1, ax2)):
-        x = np.linspace(0, 10, 100)
-        y = np.sin(x)
-        c = y
-        ax1.axhline(0, color="gray", ls=":")
-        gr.color_plot(x, y, c, cmap=custom_cmap, ax=ax1)
-        ax1.autoscale()
-
-        c = np.linspace(0, 6 * np.pi, 250)
-        r = np.linspace(1, 4, len(c)) ** 2
-        x = r * np.cos(c)
-        y = r * np.sin(c)
-        ax2.axhline(0, color="gray", ls=":", lw=0.5)
-        ax2.axvline(0, color="gray", ls=":", lw=0.5)
-        gr.color_plot(x, y, c, ax=ax2)
-
-        max_r = np.max(r)
-        ax2.set_xlim(-max_r, max_r)
-        ax2.set_ylim(-max_r, max_r)
-
-        ax2.set_aspect(1)
-
-<img src="img/color_plot_example.png" width="780px" />
-
-## Installation
-
-After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
-
-    pip install .
-
-## Usage
-
 The basic usage is identical to `seaborn`, *e.g.*:
 
-    import matplotlib.pyplot as plt
-    import pygrutils as gr
-    import numpy as np
+```python
+import matplotlib.pyplot as plt
+import pygrutils as gr
+import numpy as np
 
-    # generate some data
-    rng = np.random.default_rng(0)
-    x = np.linspace(0, 1, 100)
-    y = 3.0 * x - 0.15 + rng.normal(size=len(x))
+# generate some data
+rng = np.random.default_rng(0)
+x = np.linspace(0, 1, 100)
+y = 3.0 * x - 0.15 + rng.normal(size=len(x))
 
-    # plot it
-    fig, ax = plt.subplots()
-    res = gr.regplot(x, y, order=2, ax=ax)
+# plot it
+fig, ax = plt.subplots()
+res = gr.regplot(x, y, order=2, ax=ax)
+```
 
 will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
 
@@ -136,8 +69,87 @@ will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial thr
 
 The `statsmodels` results structure contains a wealth of information:
 
-    res.summary()
+```python
+res.summary()
+```
 
 <img src="img/regplot_example_stats.png" width="425px" />
 
 More examples can be found in the notebooks in the `test` folder.
+
+### Colorbar and colormap functions
+
+The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
+
+```python
+import numpy as np
+import pygrutils as gr
+
+rng = np.random.default_rng(0)
+with gr.FigureManager() as (_, ax):
+    n = 500
+    x = rng.uniform(size=n)
+    y = rng.uniform(size=n)
+    h = ax.scatter(x, y, c=y)
+    gr.colorbar(h)
+```
+
+<img src="img/colorbar_example.png" width="425px" />
+
+Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `gr.gradient_cmap` makes it easy:
+
+```python
+import numpy as np
+import pygrutils as gr
+
+rng = np.random.default_rng(0)
+with gr.FigureManager() as (_, ax):
+    h = ax.imshow(
+        rng.uniform(size=(20, 20)), cmap=gr.gradient_cmap("C0_to_C1", "C0", "C1")
+    )
+    gr.colorbar(h)
+```
+
+<img src="img/gradient_cmap_example.png" width="425px" />
+
+### Plotting
+
+Sometimes it is useful to generate a line plot with varying colors. This can be done like this:
+
+```python
+import numpy as np
+import pygrutils as gr
+
+custom_cmap = gr.gradient_cmap("custom_cmap", "C0", "C1")
+with gr.FigureManager(1, 2) as (_, (ax1, ax2)):
+    x = np.linspace(0, 10, 100)
+    y = np.sin(x)
+    c = y
+    ax1.axhline(0, color="gray", ls=":")
+    gr.color_plot(x, y, c, cmap=custom_cmap, ax=ax1)
+    ax1.autoscale()
+
+    c = np.linspace(0, 6 * np.pi, 250)
+    r = np.linspace(1, 4, len(c)) ** 2
+    x = r * np.cos(c)
+    y = r * np.sin(c)
+    ax2.axhline(0, color="gray", ls=":", lw=0.5)
+    ax2.axvline(0, color="gray", ls=":", lw=0.5)
+    gr.color_plot(x, y, c, ax=ax2)
+
+    max_r = np.max(r)
+    ax2.set_xlim(-max_r, max_r)
+    ax2.set_ylim(-max_r, max_r)
+
+    ax2.set_aspect(1)
+```
+
+<img src="img/color_plot_example.png" width="780px" />
+
+## Installation
+
+After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
+
+```python
+pip install .
+```
