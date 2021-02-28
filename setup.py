@@ -1,12 +1,12 @@
 from distutils.core import setup
 
 setup(
-    name="pygrutils",
-    version="0.1.5",
+    name="pydove",
+    version="0.2.0",
     author="Tiberiu Tesileanu",
     author_email="ttesileanu@gmail.com",
-    url="https://github.com/ttesileanu/pygrutils",
-    packages=["pygrutils"],
+    url="https://github.com/ttesileanu/pydove",
+    packages=["pydove"],
     install_requires=[
         "setuptools",
         "statsmodels",
