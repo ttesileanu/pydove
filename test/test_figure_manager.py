@@ -8,9 +8,9 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.4.2
 #   kernelspec:
-#     display_name: pygrutils
+#     display_name: pydove
 #     language: python
-#     name: pygrutils
+#     name: pydove
 # ---
 
 # %% [markdown]
@@ -22,7 +22,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from pygrutils import FigureManager
+from pydove import FigureManager
 
 # %% [markdown]
 # ## Basic usage
