@@ -1,6 +1,6 @@
-# pygrutils: an assortment of graphics utilities
+# PyDove: an assortment of graphics utilities
 
-![version](https://img.shields.io/badge/version-v0.1.5-blue)
+![version](https://img.shields.io/badge/version-v0.2.0-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ttesileanu/pygrutils.svg)](https://lgtm.com/projects/g/ttesileanu/pygrutils/context:python)
 
@@ -18,7 +18,7 @@ To automate this behavior, I created `FigureManager`, a context manager that bas
 
 ```python
 import numpy as np
-from pygrutils import FigureManager
+from pydove import FigureManager
 
 with FigureManager(1, 2) as (_, axs):
     x = np.linspace(0, 10, 100)
@@ -50,7 +50,7 @@ The basic usage is identical to `seaborn`, *e.g.*:
 
 ```python
 import matplotlib.pyplot as plt
-import pygrutils as gr
+import pydove as dv
 import numpy as np
 
 # generate some data
@@ -60,7 +60,7 @@ y = 3.0 * x - 0.15 + rng.normal(size=len(x))
 
 # plot it
 fig, ax = plt.subplots()
-res = gr.regplot(x, y, order=2, ax=ax)
+res = dv.regplot(x, y, order=2, ax=ax)
 ```
 
 will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
@@ -79,35 +79,35 @@ More examples can be found in the notebooks in the `test` folder.
 
 ### Colorbar and colormap functions
 
-The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pygrutils` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `gr.colorbar` does:
+The default colorbar function in `matplotlib` is not always easy to use and often leads to a colorbar whose height is not matched to the figure. The `colorbar` function in `pydove` makes this easy (using code inspired from [Stackoverflow](https://stackoverflow.com/a/18195921)). Additionaly, `plt.colorbar` does not work with `scatter`, whereas `dv.colorbar` does:
 
 ```python
 import numpy as np
-import pygrutils as gr
+import pydove as dv
 
 rng = np.random.default_rng(0)
-with gr.FigureManager() as (_, ax):
+with dv.FigureManager() as (_, ax):
     n = 500
     x = rng.uniform(size=n)
     y = rng.uniform(size=n)
     h = ax.scatter(x, y, c=y)
-    gr.colorbar(h)
+    dv.colorbar(h)
 ```
 
 <img src="img/colorbar_example.png" width="425px" />
 
-Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `gr.gradient_cmap` makes it easy:
+Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `dv.gradient_cmap` makes it easy:
 
 ```python
 import numpy as np
-import pygrutils as gr
+import pydove as dv
 
 rng = np.random.default_rng(0)
-with gr.FigureManager() as (_, ax):
+with dv.FigureManager() as (_, ax):
     h = ax.imshow(
-        rng.uniform(size=(20, 20)), cmap=gr.gradient_cmap("C0_to_C1", "C0", "C1")
+        rng.uniform(size=(20, 20)), cmap=dv.gradient_cmap("C0_to_C1", "C0", "C1")
     )
-    gr.colorbar(h)
+    dv.colorbar(h)
 ```
 
 <img src="img/gradient_cmap_example.png" width="425px" />
@@ -118,15 +118,15 @@ Sometimes it is useful to generate a line plot with varying colors. This can be 
 
 ```python
 import numpy as np
-import pygrutils as gr
+import pydove as dv
 
-custom_cmap = gr.gradient_cmap("custom_cmap", "C0", "C1")
-with gr.FigureManager(1, 2) as (_, (ax1, ax2)):
+custom_cmap = dv.gradient_cmap("custom_cmap", "C0", "C1")
+with dv.FigureManager(1, 2) as (_, (ax1, ax2)):
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
     c = y
     ax1.axhline(0, color="gray", ls=":")
-    gr.color_plot(x, y, c, cmap=custom_cmap, ax=ax1)
+    dv.color_plot(x, y, c, cmap=custom_cmap, ax=ax1)
     ax1.autoscale()
 
     c = np.linspace(0, 6 * np.pi, 250)
@@ -135,7 +135,7 @@ with gr.FigureManager(1, 2) as (_, (ax1, ax2)):
     y = r * np.sin(c)
     ax2.axhline(0, color="gray", ls=":", lw=0.5)
     ax2.axvline(0, color="gray", ls=":", lw=0.5)
-    gr.color_plot(x, y, c, ax=ax2)
+    dv.color_plot(x, y, c, ax=ax2)
 
     max_r = np.max(r)
     ax2.set_xlim(-max_r, max_r)

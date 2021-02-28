@@ -39,7 +39,7 @@ def regplot(
 ) -> Optional[RegressionResults]:
     """ Version of Seaborn `regplot` that returns fit results.
 
-    This uses `gr.scatter` with `gr.polyfit` and `gr.fitplot`.
+    This uses `pydove.scatter` with `pydove.polyfit` and `pydove.fitplot`.
     
     Parameters
     ----------
@@ -108,7 +108,7 @@ def regplot(
     ax
         Axes object to draw the plot onto, otherwise uses `plt.gca()`.
 
-    Returns the results from `gr.polyfit`, or `None` if the data is empty.
+    Returns the results from `pydove.polyfit`, or `None` if the data is empty.
     """
     # convert data to a standard form
     x, y = _standardize_data(x=x, y=y, data=data, dropna=dropna)
