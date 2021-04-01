@@ -1,11 +1,26 @@
+import pathlib
 from distutils.core import setup
+
+README = pathlib.Path("README.md").read_text()
 
 setup(
     name="pydove",
-    version="0.2.0",
+    version="0.3.0",
+    description="An assortment of graphics utilities",
+    long_description=README,
+    long_description_content_type="text/markdown",
     author="Tiberiu Tesileanu",
     author_email="ttesileanu@gmail.com",
+    license="MIT",
     url="https://github.com/ttesileanu/pydove",
+    classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Framework :: Jupyter",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Visualization",
+    ],
     packages=["pydove"],
     install_requires=[
         "setuptools",
@@ -15,4 +30,5 @@ setup(
         "numpy",
         "scipy",
     ],
+    include_package_data=True,
 )
