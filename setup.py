@@ -17,7 +17,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
-        "Framework :: Jupyter",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Visualization",
     ],
