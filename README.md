@@ -1,6 +1,6 @@
 # PyDove: an assortment of graphics utilities
 
-![version](https://img.shields.io/badge/version-v0.3.2-blue)
+![version](https://img.shields.io/badge/version-v0.3.3-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ttesileanu/pygrutils.svg)](https://lgtm.com/projects/g/ttesileanu/pygrutils/context:python)
 
