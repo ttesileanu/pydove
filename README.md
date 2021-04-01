@@ -1,6 +1,6 @@
 # PyDove: an assortment of graphics utilities
 
-![version](https://img.shields.io/badge/version-v0.2.0-blue)
+![version](https://img.shields.io/badge/version-v0.3.3-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ttesileanu/pygrutils.svg)](https://lgtm.com/projects/g/ttesileanu/pygrutils/context:python)
 
@@ -12,7 +12,7 @@ This is an assortment of utilities for plotting in Python using [`matplotlib`](h
 
 The default `matplotlib` figure uses a box around the figure. For most plots I find this to be both a waste of ink and a bit ugly. It can also make it hard to see points close to the edges of the figure. For these reasons, I usually use the [`despine`](https://seaborn.pydata.org/generated/seaborn.despine.html?highlight=despine#seaborn.despine) function from `seaborn` to remove the right and upper segments of the figure box, and also to add a bit of an offset between the remaining spines. Like this:
 
-<img src="img/figure_manager_example.png" width="850px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/figure_manager_example.png" width="850px" />
 
 To automate this behavior, I created `FigureManager`, a context manager that basically calls `plt.subplots`, but also applies `despine` to the axes upon exit. For instance, the figure above can be obtained using:
 
@@ -65,7 +65,7 @@ res = dv.regplot(x, y, order=2, ax=ax)
 
 will make a scatter plot of `y` *vs.* `x`, fitting a second-order polynomial through the data:
 
-<img src="img/regplot_example.png" width="370px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/regplot_example.png" width="370px" />
 
 The `statsmodels` results structure contains a wealth of information:
 
@@ -73,7 +73,7 @@ The `statsmodels` results structure contains a wealth of information:
 res.summary()
 ```
 
-<img src="img/regplot_example_stats.png" width="425px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/regplot_example_stats.png" width="425px" />
 
 More examples can be found in the notebooks in the `test` folder.
 
@@ -94,7 +94,7 @@ with dv.FigureManager() as (_, ax):
     dv.colorbar(h)
 ```
 
-<img src="img/colorbar_example.png" width="425px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/colorbar_example.png" width="425px" />
 
 Sometimes it is useful to define a color map that interpolates between two given colors. Matplotlib's `LinearSegmentedColormap` does this, but in a format that is awkward to use. The function `dv.gradient_cmap` makes it easy:
 
@@ -110,7 +110,7 @@ with dv.FigureManager() as (_, ax):
     dv.colorbar(h)
 ```
 
-<img src="img/gradient_cmap_example.png" width="425px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/gradient_cmap_example.png" width="425px" />
 
 ### Plotting
 
@@ -144,9 +144,19 @@ with dv.FigureManager(1, 2) as (_, (ax1, ax2)):
     ax2.set_aspect(1)
 ```
 
-<img src="img/color_plot_example.png" width="780px" />
+<img src="https://github.com/ttesileanu/pydove/raw/main/img/color_plot_example.png" width="780px" />
 
 ## Installation
+
+### From PyPI
+
+The package is now aviable on PyPI, so you can simply run
+
+```python
+pip install pydove
+```
+
+### From source
 
 After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
 
