@@ -148,6 +148,16 @@ with dv.FigureManager(1, 2) as (_, (ax1, ax2)):
 
 ## Installation
 
+### From PyPI
+
+The package is now aviable on PyPI, so you can simply run
+
+```python
+pip install pydove
+```
+
+### From source
+
 After cloning the repository or downloading and decompressing, run the following command in the folder containing `setup.py`:
 
 ```python
