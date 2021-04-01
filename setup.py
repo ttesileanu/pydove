@@ -1,5 +1,5 @@
 import pathlib
-from distutils.core import setup
+from setuptools import setup
 
 README = pathlib.Path("README.md").read_text()
 
