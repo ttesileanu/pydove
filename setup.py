@@ -5,7 +5,7 @@ README = pathlib.Path("README.md").read_text()
 
 setup(
     name="pydove",
-    version="0.3.4",
+    version="0.3.5",
     description="An assortment of graphics utilities",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -24,9 +24,9 @@ setup(
     install_requires=[
         "setuptools",
         "statsmodels",
-        "matplotlib",
+        "matplotlib>=3.1.1",
         "seaborn",
-        "numpy",
+        "numpy>=1.16.4",
         "scipy",
     ],
     include_package_data=True,

@@ -1,6 +1,9 @@
 # PyDove: an assortment of graphics utilities
 
-![version](https://img.shields.io/badge/version-v0.3.4-blue)
+![version](https://img.shields.io/badge/version-v0.3.5-blue)
+[![Python 3.6](https://img.shields.io/badge/python-3.6-yellow.svg)](https://www.python.org/downloads/release/python-360/)
+![numpy](https://img.shields.io/badge/numpy-v1.16.4-blue)
+![matplotlib](https://img.shields.io/badge/matplotlib-v3.1.1-blue)
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/ttesileanu/pygrutils.svg)](https://lgtm.com/projects/g/ttesileanu/pygrutils/context:python)
 
@@ -40,7 +43,7 @@ There are some things that this `regplot` function does better than `sns.regplot
 
 * **consistency:** all the fits are calculated using `statsmodels`, even the polynomial ones.
 * **speed:** confidence intervals are calculated directly using `statsmodels`, removing the need for bootstrapping.
-* **flexibility:** polynomial fits in `log(x)` work are not allowed in `sns.regplot` but work here.
+* **flexibility:** polynomial fits in `log(x)` are not allowed in `sns.regplot` but work here.
 * **configurability:**
 
   * the number of points used for the fit line and confidence interval is configurable;
@@ -150,7 +153,7 @@ with dv.FigureManager(1, 2) as (_, (ax1, ax2)):
 
 ### From PyPI
 
-The package is now aviable on PyPI, so you can simply run
+The package is now available on PyPI, so you can simply run
 
 ```python
 pip install pydove
