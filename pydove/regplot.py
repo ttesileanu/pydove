@@ -12,6 +12,12 @@ from matplotlib.collections import PathCollection
 from statsmodels.regression.linear_model import RegressionResults
 
 
+try:
+    RandomType = Union[int, np.random.Generator, np.random.RandomState]
+except:
+    RandomType = Union[int, np.random.RandomState]
+
+
 def regplot(
     x: Union[None, str, pd.Series, Sequence] = None,
     y: Union[None, str, pd.Series, Sequence] = None,
@@ -21,7 +27,7 @@ def regplot(
     fit_reg: bool = True,
     ci: Optional[float] = 95,
     n_points: int = 100,
-    seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
+    seed: RandomType = 0,
     order: int = 1,
     logx: bool = False,
     truncate: bool = True,
@@ -190,7 +196,7 @@ def scatter(
     data: Optional[pd.DataFrame] = None,
     dropna: bool = True,
     x_estimator: Optional[Callable[[Sequence], float]] = None,
-    seed: Union[int, np.random.Generator, np.random.RandomState] = 0,
+    seed: RandomType = 0,
     x_jitter: float = 0,
     y_jitter: float = 0,
     x_ci_kws: Optional[dict] = None,
@@ -463,7 +469,7 @@ def _standardize_data(
 def _prepare_data(
     x: Sequence,
     y: Sequence,
-    seed: Union[int, np.random.Generator, np.random.RandomState],
+    seed: RandomType,
     x_jitter: float,
     y_jitter: float,
     x_estimator: Optional[Callable[[Sequence], float]],
