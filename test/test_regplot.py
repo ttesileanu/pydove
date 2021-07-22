@@ -291,7 +291,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4), tight_layout=True)
 dv.scatter("x1", "x2", df, ax=ax1)
 
 dv.scatter("x1", "x2", df, s=4, c="gray", ax=ax2)
-dv.scatter(x, "x2", df, x_jitter=0.02, y_jitter=0.08, ax=ax2)
+dv.scatter("x1", "x2", df, x_jitter=0.02, y_jitter=0.08, ax=ax2)
 
 ax2.set_title("with jitter")
 
